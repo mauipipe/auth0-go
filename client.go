@@ -69,8 +69,12 @@ func (c *Client) startTokenRefresher() {
 //
 // The `input` and `output` interfaces are JSON marshalled/unmarshalled.
 func (c *Client) POST(endpoint string, input interface{}, output interface{}) error {
-	// TODO: fill me in!
-	return nil
+	b, err := c.request("POST", endpoint, nil, input)
+	if err != nil {
+		return err
+	}
+
+	return json.Unmarshal(b, &output)
 }
 
 // GET sends a GET request to the specified Auth0 Management API using the client token.
