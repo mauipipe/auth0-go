@@ -1,10 +1,5 @@
 package auth0
 
-// This does things yadda yada yadya dalskdjkasd
-// 	func (t *Token) Thing() {
-//		log.Println(lb)
-//  }
-
 import (
 	"bytes"
 	"encoding/json"

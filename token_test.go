@@ -1,6 +1,8 @@
 package auth0
 
-import "testing"
+import (
+	"testing"
+)
 
 func Test_authEndpointFromAudience(t *testing.T) {
 	type args struct {
