@@ -1,7 +1,12 @@
 package auth0
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"io"
+	"io/ioutil"
+	"net/http"
 	"time"
 
 	"github.com/pkg/errors"
@@ -72,6 +77,66 @@ func (c *Client) POST(endpoint string, input interface{}, output interface{}) er
 //
 // The `params` map will be added to the query string and the `output` interface is JSON umarshalled.
 func (c *Client) GET(endpoint string, params map[string]string, output interface{}) error {
-	// TODO: fill me in!
-	return nil
+	b, err := c.request("GET", endpoint, params, nil)
+	if err != nil {
+		return err
+	}
+
+	return json.Unmarshal(b, &output)
+}
+
+// the low-level request function sets the headers properly
+func (c *Client) request(method, endpoint string, params map[string]string, body interface{}) ([]byte, error) {
+	// Ensure we have a valid client
+	if !c.valid {
+		return nil, errors.New("Auth0 client is not valid, try creating a new one with NewClient method")
+	}
+
+	// Construct the URL
+	url := fmt.Sprintf("%s/%s", c.Audience, endpoint)
+
+	// Marshal the payload (if we have one)
+	var payloadReader io.Reader
+
+	if body != nil {
+		b, err := json.Marshal(body)
+		if err != nil {
+			return nil, errors.Wrap(err, "Error marshalling request payload")
+		}
+		payloadReader = bytes.NewReader(b)
+	}
+
+	// Build the request
+	req, err := http.NewRequest(method, url, payloadReader)
+	if err != nil {
+		return nil, errors.Wrap(err, "Error building request")
+	}
+
+	// Add the authorization header and content header
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Authorization", "Bearer "+c.token.AccessToken)
+
+	// Add query params if there are any
+	if len(params) > 0 {
+		q := req.URL.Query()
+
+		for k, v := range params {
+			q.Add(k, v)
+		}
+
+		req.URL.RawQuery = q.Encode()
+	}
+
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, errors.Wrap(err, "Error executing request")
+	}
+	defer res.Body.Close()
+
+	resBody, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return nil, errors.Wrap(err, "Error reading response body")
+	}
+
+	return resBody, nil
 }
