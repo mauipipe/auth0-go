@@ -48,6 +48,27 @@ fmt.Println(res["user_id"])
 
 The `POST` and `GET` methods are such that you can still use this lib for methods we haven't wired up.
 
+For methods that *have* been wired up, it's easier -
+
+```
+c, err := auth0.NewClient(
+    "client id",
+    "client secret",
+    "https://mock.auth0.com/api/v2/")
+
+u, err := c.UserCreate(&auth0.UserCreateParams{
+    Email:         "nick.bradshaw@us.navy.mil",
+    Connection:    "email",
+    UserMetadata:  map[string]string{"favourite_spelling_of_favourite": "favorite"},
+    EmailVerified: true,
+    PhoneVerified: true,
+    VerifyEmail:   false,
+})
+
+fmt.Printf("ID: %s", u.UserID)
+// output: UserID:"email|59f8dac47cd312629715db8e"
+```
+
 # Getting dependencies (if you need to)
 
 `auth0-go` uses the excellent [dep](https://github.com/golang/dep) tool and the `vendor` directory is not included in this repository.

@@ -19,6 +19,7 @@ type Client struct {
 	Audience     string
 	token        *Token
 	valid        bool
+	Debug        bool
 }
 
 // NewClient returns a Client usable for executing authenticated Auth0 Management API methods
@@ -97,7 +98,11 @@ func (c *Client) request(method, endpoint string, params map[string]string, body
 	}
 
 	// Construct the URL
-	url := fmt.Sprintf("%s/%s", c.Audience, endpoint)
+	url := fmt.Sprintf("%s%s", c.Audience, endpoint)
+
+	if c.Debug {
+		fmt.Printf("ENDPOINT: %s\n", url)
+	}
 
 	// Marshal the payload (if we have one)
 	var payloadReader io.Reader
@@ -107,6 +112,11 @@ func (c *Client) request(method, endpoint string, params map[string]string, body
 		if err != nil {
 			return nil, errors.Wrap(err, "Error marshalling request payload")
 		}
+
+		if c.Debug {
+			fmt.Printf("REQUEST: %s\n", string(b))
+		}
+
 		payloadReader = bytes.NewReader(b)
 	}
 
@@ -140,6 +150,10 @@ func (c *Client) request(method, endpoint string, params map[string]string, body
 	resBody, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		return nil, errors.Wrap(err, "Error reading response body")
+	}
+
+	if c.Debug {
+		fmt.Printf("RESPONSE: %s\n", string(resBody))
 	}
 
 	return resBody, nil
