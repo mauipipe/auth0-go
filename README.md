@@ -1,4 +1,7 @@
 # auth0-go
+
+[![GoDoc](https://godoc.org/github.com/credcap/auth0-go?status.svg)](https://godoc.org/github.com/credcap/auth0-go)
+
 Helper library for Auth0 API
 
 # Basics
