@@ -25,12 +25,12 @@ type Token struct {
 //
 // The ClientID and Audience can be found on your Auth0 APIs page, located
 // at https://manage.auth0.com/#/apis/.  (Audience is labeled as Identifier).
-func GetToken(clientID, clientSecret, audience string) (*Token, error) {
-	url, err := authEndpointFromAudience(audience)
+func GetToken(clientID, clientSecret, audience, endpoint string) (*Token, error) {
+	// url, err := authEndpointFromAudience(audience)
 
-	if err != nil {
-		return nil, errors.Wrap(err, "Error getting token request URL")
-	}
+	// if err != nil {
+	// 	return nil, errors.Wrap(err, "Error getting token request URL")
+	// }
 
 	payload := struct {
 		ClientID     string `json:"client_id"`
@@ -49,7 +49,7 @@ func GetToken(clientID, clientSecret, audience string) (*Token, error) {
 		return nil, errors.Wrap(err, "Error marshalling JSON token request payload")
 	}
 
-	req, err := http.NewRequest("POST", url, bytes.NewReader(b))
+	req, err := http.NewRequest("POST", endpoint, bytes.NewReader(b))
 	if err != nil {
 		return nil, errors.Wrap(err, "Error building token request")
 	}
