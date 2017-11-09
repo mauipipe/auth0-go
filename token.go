@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"strings"
 
 	"github.com/pkg/errors"
 )
@@ -25,12 +24,14 @@ type Token struct {
 //
 // The ClientID and Audience can be found on your Auth0 APIs page, located
 // at https://manage.auth0.com/#/apis/.  (Audience is labeled as Identifier).
-func GetToken(clientID, clientSecret, audience, endpoint string) (*Token, error) {
-	// url, err := authEndpointFromAudience(audience)
+// The Domain can be found on your Auth0 Clients page, located at
+// https://manage.auth0.com/#/clients/ under your Client's "Settings"
+func GetToken(clientID, clientSecret, audience, domain string) (*Token, error) {
+	url, err := authEndpointFromDomain(domain)
 
-	// if err != nil {
-	// 	return nil, errors.Wrap(err, "Error getting token request URL")
-	// }
+	if err != nil {
+		return nil, errors.Wrap(err, "Error getting token request URL")
+	}
 
 	payload := struct {
 		ClientID     string `json:"client_id"`
@@ -49,7 +50,7 @@ func GetToken(clientID, clientSecret, audience, endpoint string) (*Token, error)
 		return nil, errors.Wrap(err, "Error marshalling JSON token request payload")
 	}
 
-	req, err := http.NewRequest("POST", endpoint, bytes.NewReader(b))
+	req, err := http.NewRequest("POST", url, bytes.NewReader(b))
 	if err != nil {
 		return nil, errors.Wrap(err, "Error building token request")
 	}
@@ -79,14 +80,8 @@ func GetToken(clientID, clientSecret, audience, endpoint string) (*Token, error)
 }
 
 // e.g. https://mock.auth0.com/oauth/token from
-// https://mock.auth0.com/api/v2/
-func authEndpointFromAudience(audience string) (string, error) {
-	parts := strings.Split(audience, "/")
-
-	if len(parts) != 6 {
-		return "", fmt.Errorf("Bad Audience URL '%s', should look like 'https://mock.auth0.com/api/v2/'", audience)
-	}
+// mock.auth0.com
+func authEndpointFromDomain(domain string) (string, error) {
 	// TODO: more validations?
-
-	return fmt.Sprintf("%s/oauth/token", strings.Join(parts[0:3], "/")), nil
+	return fmt.Sprintf("https://%s/oauth/token", domain), nil
 }

@@ -17,15 +17,15 @@ type Client struct {
 	ClientID     string
 	ClientSecret string
 	Audience     string
-	Endpoint     string
+	Domain       string
 	token        *Token
 	valid        bool
 	Debug        bool
 }
 
 // NewClient returns a Client usable for executing authenticated Auth0 Management API methods
-func NewClient(clientID, clientSecret, audience, endpoint string) (*Client, error) {
-	token, err := GetToken(clientID, clientSecret, audience, endpoint)
+func NewClient(clientID, clientSecret, audience, domain string) (*Client, error) {
+	token, err := GetToken(clientID, clientSecret, audience, domain)
 	if err != nil {
 		return nil, errors.Wrap(err, "Error intializing new Auth0 client")
 	}
@@ -34,7 +34,7 @@ func NewClient(clientID, clientSecret, audience, endpoint string) (*Client, erro
 		ClientID:     clientID,
 		ClientSecret: clientSecret,
 		Audience:     audience,
-		Endpoint:     endpoint,
+		Domain:       domain,
 		token:        token,
 		valid:        true,
 	}
@@ -53,7 +53,7 @@ func (c *Client) startTokenRefresher() {
 	refresher := time.NewTicker(time.Second * time.Duration(c.token.ExpiresIn-5))
 	go func() {
 		for _ = range refresher.C {
-			token, err := GetToken(c.ClientID, c.ClientSecret, c.Audience, c.Endpoint)
+			token, err := GetToken(c.ClientID, c.ClientSecret, c.Audience, c.Domain)
 			if err != nil {
 				fmt.Printf("Error refreshing Auth0 token: %s", err.Error())
 
