@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/Sirupsen/logrus"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -159,11 +158,20 @@ func (c *Client) request(method, endpoint string, params map[string]string, body
 		fmt.Printf("RESPONSE: %s\n", string(resBody))
 	}
 
-	logrus.WithFields(logrus.Fields{
-		"status code": res.StatusCode,
-		"status":      res.Status,
-		"header":      res.Header,
-	}).Info("Response")
+	if !(res.StatusCode >= 200 && res.StatusCode < 300) {
+		var e struct {
+			StatusCode int
+			Error      string
+			Message    string
+			ErrorCode  string
+		}
+
+		json.Unmarshal(resBody, &e)
+
+		err = fmt.Errorf("%v %s: %s; %s", e.StatusCode, e.Error, e.ErrorCode, e.Message)
+
+		return nil, errors.Wrap(err, "Auth0 response contains error")
+	}
 
 	return resBody, nil
 }
