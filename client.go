@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/Sirupsen/logrus"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -76,6 +77,8 @@ func (c *Client) POST(endpoint string, input interface{}, output interface{}) er
 	if err != nil {
 		return err
 	}
+
+	logrus.WithField("user", output).Info("Raw Output")
 
 	return json.Unmarshal(b, &output)
 }

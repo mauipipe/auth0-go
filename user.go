@@ -3,6 +3,7 @@ package auth0
 import (
 	"time"
 
+	"github.com/Sirupsen/logrus"
 	"github.com/pkg/errors"
 )
 
@@ -53,6 +54,12 @@ func (c *Client) UserCreate(p *UserCreateParams) (*User, error) {
 	if err := c.POST("users", p, &u); err != nil {
 		return nil, errors.Wrap(err, "Error creating user")
 	}
+
+	logrus.WithFields(logrus.Fields{
+		"email": u.Email,
+		"md":    u.UserMetadata,
+		"id":    u.UserID,
+	}).Info("User Created")
 
 	return &u, nil
 }
