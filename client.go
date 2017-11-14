@@ -17,14 +17,15 @@ type Client struct {
 	ClientID     string
 	ClientSecret string
 	Audience     string
+	Domain       string
 	token        *Token
 	valid        bool
 	Debug        bool
 }
 
 // NewClient returns a Client usable for executing authenticated Auth0 Management API methods
-func NewClient(clientID, clientSecret, audience string) (*Client, error) {
-	token, err := GetToken(clientID, clientSecret, audience)
+func NewClient(clientID, clientSecret, audience, domain string) (*Client, error) {
+	token, err := GetToken(clientID, clientSecret, audience, domain)
 	if err != nil {
 		return nil, errors.Wrap(err, "Error intializing new Auth0 client")
 	}
@@ -33,6 +34,7 @@ func NewClient(clientID, clientSecret, audience string) (*Client, error) {
 		ClientID:     clientID,
 		ClientSecret: clientSecret,
 		Audience:     audience,
+		Domain:       domain,
 		token:        token,
 		valid:        true,
 	}
@@ -51,7 +53,7 @@ func (c *Client) startTokenRefresher() {
 	refresher := time.NewTicker(time.Second * time.Duration(c.token.ExpiresIn-5))
 	go func() {
 		for _ = range refresher.C {
-			token, err := GetToken(c.ClientID, c.ClientSecret, c.Audience)
+			token, err := GetToken(c.ClientID, c.ClientSecret, c.Audience, c.Domain)
 			if err != nil {
 				fmt.Printf("Error refreshing Auth0 token: %s", err.Error())
 
@@ -154,6 +156,21 @@ func (c *Client) request(method, endpoint string, params map[string]string, body
 
 	if c.Debug {
 		fmt.Printf("RESPONSE: %s\n", string(resBody))
+	}
+
+	if !(res.StatusCode >= 200 && res.StatusCode < 300) {
+		var e struct {
+			StatusCode int
+			Error      string
+			Message    string
+			ErrorCode  string
+		}
+
+		json.Unmarshal(resBody, &e)
+
+		err = fmt.Errorf("%v %s: %s; %s", e.StatusCode, e.Error, e.ErrorCode, e.Message)
+
+		return nil, errors.Wrap(err, "Auth0 response contains error")
 	}
 
 	return resBody, nil

@@ -25,8 +25,10 @@ type Token struct {
 //
 // The ClientID and Audience can be found on your Auth0 APIs page, located
 // at https://manage.auth0.com/#/apis/.  (Audience is labeled as Identifier).
-func GetToken(clientID, clientSecret, audience string) (*Token, error) {
-	url, err := authEndpointFromAudience(audience)
+// The Domain can be found on your Auth0 Clients page, located at
+// https://manage.auth0.com/#/clients/ under your Client's "Settings"
+func GetToken(clientID, clientSecret, audience, domain string) (*Token, error) {
+	url, err := authEndpointFromDomain(domain)
 
 	if err != nil {
 		return nil, errors.Wrap(err, "Error getting token request URL")
@@ -78,15 +80,18 @@ func GetToken(clientID, clientSecret, audience string) (*Token, error) {
 	return &t, nil
 }
 
-// e.g. https://mock.auth0.com/oauth/token from
-// https://mock.auth0.com/api/v2/
-func authEndpointFromAudience(audience string) (string, error) {
-	parts := strings.Split(audience, "/")
+// e.g. https://mock.auth0.com/oauth/token from mock.auth0.com
+func authEndpointFromDomain(domain string) (string, error) {
+	parts := strings.Split(domain, ".")
 
-	if len(parts) != 6 {
-		return "", fmt.Errorf("Bad Audience URL '%s', should look like 'https://mock.auth0.com/api/v2/'", audience)
+	lastIdx := len(parts) - 1
+	end := strings.Join(parts[lastIdx-1:], ".")
+
+	if end != "auth0.com" {
+		return "", fmt.Errorf("Bad Domain URL '%s', should look like 'mock.auth0.com'", domain)
 	}
+
 	// TODO: more validations?
 
-	return fmt.Sprintf("%s/oauth/token", strings.Join(parts[0:3], "/")), nil
+	return fmt.Sprintf("https://%s/oauth/token", domain), nil
 }

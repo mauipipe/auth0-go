@@ -9,7 +9,7 @@ Helper library for [Auth0 Management API](https://auth0.com/docs/api/management/
 All requests to the Management API need to use a token, you can get one using the `GetToken` method.
 
 ```
-token, err := auth0.GetToken("client_id", "client_secret", "https://mock.auth0.com/api/v2/")
+token, err := auth0.GetToken("client_id", "client_secret", "https://mock.auth0.com/api/v2/", "mock.auth0.com")
 
 fmt.Println(token.AccessToken)
 // outputs eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6IlFqUTVORG[...]
@@ -22,7 +22,7 @@ You can create a `Client` which will keep the token fresh and automatically corr
 For example, to call the [Create Users](https://auth0.com/docs/api/management/v2#!/Users/post_users) endpoint...
 
 ```
-c, _ := auth0.NewClient("client_id", "client_secret", "https://mock.auth0.com/api/v2/")
+c, _ := auth0.NewClient("client_id", "client_secret", "https://mock.auth0.com/api/v2/", "mock.auth0.com")
 
 var res interface{}
 
@@ -54,7 +54,8 @@ For methods that *have* been wired up, it's easier -
 c, err := auth0.NewClient(
     "client id",
     "client secret",
-    "https://mock.auth0.com/api/v2/")
+    "https://mock.auth0.com/api/v2/", 
+    "mock.auth0.com")
 
 u, err := c.UserCreate(&auth0.UserCreateParams{
     Email:         "nick.bradshaw@us.navy.mil",
