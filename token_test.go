@@ -4,9 +4,9 @@ import (
 	"testing"
 )
 
-func Test_authEndpointFromAudience(t *testing.T) {
+func Test_authEndpointFromDomain(t *testing.T) {
 	type args struct {
-		audience string
+		domain string
 	}
 	tests := []struct {
 		name    string
@@ -17,7 +17,7 @@ func Test_authEndpointFromAudience(t *testing.T) {
 		{
 			name: "good audience",
 			args: args{
-				audience: "https://mock.auth0.com/api/v2/",
+				domain: "mock.auth0.com",
 			},
 			want:    "https://mock.auth0.com/oauth/token",
 			wantErr: false,
@@ -25,7 +25,7 @@ func Test_authEndpointFromAudience(t *testing.T) {
 		{
 			name: "bad audience",
 			args: args{
-				audience: "https://mock.auth0.com",
+				domain: "mock.com",
 			},
 			want:    "",
 			wantErr: true,
@@ -33,13 +33,13 @@ func Test_authEndpointFromAudience(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := authEndpointFromAudience(tt.args.audience)
+			got, err := authEndpointFromDomain(tt.args.domain)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("authEndpointFromAudience() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("authEndpointFromDomain() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if got != tt.want {
-				t.Errorf("authEndpointFromAudience() = %v, want %v", got, tt.want)
+				t.Errorf("authEndpointFromDomain() = %v, want %v", got, tt.want)
 			}
 		})
 	}

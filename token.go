@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strings"
 
 	"github.com/pkg/errors"
 )
@@ -79,9 +80,18 @@ func GetToken(clientID, clientSecret, audience, domain string) (*Token, error) {
 	return &t, nil
 }
 
-// e.g. https://mock.auth0.com/oauth/token from
-// mock.auth0.com
+// e.g. https://mock.auth0.com/oauth/token from mock.auth0.com
 func authEndpointFromDomain(domain string) (string, error) {
+	parts := strings.Split(domain, ".")
+
+	lastIdx := len(parts) - 1
+	end := strings.Join(parts[lastIdx-1:], ".")
+
+	if end != "auth0.com" {
+		return "", fmt.Errorf("Bad Domain URL '%s', should look like 'mock.auth0.com'", domain)
+	}
+
 	// TODO: more validations?
+
 	return fmt.Sprintf("https://%s/oauth/token", domain), nil
 }
