@@ -161,5 +161,7 @@ func (c *Client) request(method, endpoint string, params map[string]string, body
 		fmt.Printf("RESPONSE: %s\n", string(resBody))
 	}
 
+	logrus.WithField("res", res).Info("Response")
+
 	return resBody, nil
 }
