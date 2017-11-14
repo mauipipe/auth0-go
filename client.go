@@ -78,8 +78,6 @@ func (c *Client) POST(endpoint string, input interface{}, output interface{}) er
 		return err
 	}
 
-	logrus.WithField("user", output).Info("Raw Output")
-
 	return json.Unmarshal(b, &output)
 }
 
@@ -161,7 +159,11 @@ func (c *Client) request(method, endpoint string, params map[string]string, body
 		fmt.Printf("RESPONSE: %s\n", string(resBody))
 	}
 
-	logrus.WithField("res", res).Info("Response")
+	logrus.WithFields(logrus.Fields{
+		"status code": res.StatusCode,
+		"status":      res.Status,
+		"header":      res.Header,
+	}).Info("Response")
 
 	return resBody, nil
 }
